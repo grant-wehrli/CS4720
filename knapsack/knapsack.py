@@ -4,21 +4,21 @@ from typing import List, Tuple
 # simply fill arrays with values from file
 def read_file(path: str):
     with open(path, "r") as file:
-        lines = [line.strip() for line in file if line.strip()]
+        lines = [line.strip() for line in file]
 
-    # capacity and num items
+    # capacity and number of items
     capacity, num_items = map(int, lines[0].split())
 
-    values = []
-    weights = []
+    values: List[int] = []
+    sizes: List[int] = []  
 
-    # valie and weight on next line
+    # value and size on each following line
     for i in range(1, num_items + 1):
-        v, w = map(int, lines[i].split())
+        v, s = map(int, lines[i].split())
         values.append(v)
-        weights.append(w)
+        sizes.append(s)
 
-    return capacity, values, weights
+    return capacity, values, sizes
 
 #print(read_file("problem16.7test.txt"))
 
@@ -104,7 +104,7 @@ def print_results(capacity, values, sizes, A, selections, print_array: bool = Tr
     for v in values:
         print(v)
     # sizes
-    print("Values")
+    print("Sizes")
     for s in sizes:
         print(s)
 
@@ -117,8 +117,9 @@ def print_results(capacity, values, sizes, A, selections, print_array: bool = Tr
             print(row)
 
     # selections
-    for i in selections:
-        print(f"{i+1}: {selections[i]}")
+    print("Selections")
+    for i, s in enumerate(selections, start=1):
+        print(f"{i}: {'true' if s else 'false'}")
 
     # total optimal value
     print(f"Total Optimal Value: {A[n][capacity]}")
@@ -143,5 +144,5 @@ print_results(capacity, values, sizes, A, selections)
 capacity, values, sizes = read_file("problem16.7test.txt")
 A = knapsack(capacity, values, sizes)
 selections = reconstruct(A, values, sizes, capacity)
-print_results(capacity, values, sizes, A, selections)
+print_results(capacity, values, sizes, A, selections, print_array = False)
 
