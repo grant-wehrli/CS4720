@@ -24,49 +24,44 @@ def read_file(path: str):
 
 
 '''pseudocode for dp table contruction
-inputs: capacity (W), num items (N), values array, weights array
+inputs: capacity (C), values array, weights array
 
-create array: A[0 to n][0 to W]
+create array: A[0 to n][0 to C]
 
-for x = 0 to W:
-    A[0][x] = 0
+# basecase  i = 0
+for x = 0 to C:
+    A[0][c] = 0
 
+    # subproblems
 for i = 1 to n:
-    for x = 0 to W:
+    for c = 0 to C:
         #too large to fit
-        if weights[i] > x:
-            A[i][x] = A[i-1][x]
+        if weights[i] > c:
+            A[i][c] = A[i-1][c]
         else:
-            #skip or take, x is current capacity
-            skip = A[i-1][x]
-            take = A[i-1][x - weights[i]] + values[i]
-            
-            A[i][x] = max(skip, take)
+            #skip or take, c is current capacity
+            skip = A[i-1][c]
+            take = A[i-1][c - weights[i]] + values[i]
+            A[i][c] = max(skip, take)
 
 optimal value - A[n][W]
 '''
 def knapsack(capacity, values, sizes):
     n = len(values)
     A = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
-
-    for x in range(capacity + 1):
-        A[0][x] = 0
     
     for i in range(1, n + 1):
-        for x in range(capacity + 1):
-            size = sizes[i - 1]
-            value = values[i - 1]
-            if size > x:
-                A[i][x] = A[i-1][x]
+        size_i = sizes[i - 1]
+        value_i = values[i - 1]
+        for c in range(capacity + 1):
+            if size_i > c:
+                A[i][c] = A[i - 1][c]
             else:
-                skip = A[i-1][x]
-                take = A[i-1][x - size] + value
-                A[i][x] = max(skip, take)
+                skip = A[i - 1][c]
+                take = A[i - 1][c - size_i] + value_i
+                A[i][c] = max(skip, take)
 
-    return A[n][capacity]
-
-capacity, values, sizes = read_file("problem16.7test.txt")
-print(knapsack(capacity, values, sizes))
+    return A
 
 '''reconstruct knapsack contents pseudocode
    s[1 to n] init to false
@@ -97,7 +92,56 @@ def reconstruct(A, values, sizes,capacity):
         
         if s_i <= c and A[i - 1][c - s_i] + v_i >= A[i - 1][c]:
             S[i - 1] = True
-            x = x - s_i
+            c = c - s_i
 
     return S
+
+def print_results(capacity, values, sizes, A, selections, print_array: bool = True):
+    n = len(values)
+
+    # values
+    print("Values")
+    for v in values:
+        print(v)
+    # sizes
+    print("Values")
+    for s in sizes:
+        print(s)
+
+    # print array (if specified)
+    if print_array:
+        print("Array")
+        # print from n to 0, each row just like the example
+        for i in range(n, -1, -1):
+            row = " ".join(str(A[i][c]) for c in range(capacity + 1))
+            print(row)
+
+    # selections
+    for i in selections:
+        print(f"{i+1}: {selections[i]}")
+
+    # total optimal value
+    print(f"Total Optimal Value: {A[n][capacity]}")
+    
+
+
+# testing
+
+# book example
+capacity, values, sizes = read_file("book_example.txt")
+A = knapsack(capacity, values, sizes)
+selections = reconstruct(A, values, sizes, capacity)
+print_results(capacity, values, sizes, A, selections)
+
+# class example
+capacity, values, sizes = read_file("class_example.txt")
+A = knapsack(capacity, values, sizes)
+selections = reconstruct(A, values, sizes, capacity)
+print_results(capacity, values, sizes, A, selections)
+
+# large book example
+capacity, values, sizes = read_file("problem16.7test.txt")
+A = knapsack(capacity, values, sizes)
+selections = reconstruct(A, values, sizes, capacity)
+print_results(capacity, values, sizes, A, selections)
 
