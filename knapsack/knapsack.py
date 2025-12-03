@@ -1,5 +1,4 @@
-import sys
-from typing import List, Tuple
+from typing import List
 
 # simply fill arrays with values from file
 def read_file(path: str):
@@ -48,19 +47,30 @@ optimal value - A[n][W]
 '''
 def knapsack(capacity, values, sizes):
     n = len(values)
+    # initalize list
+    # A[i][c] is equal to the best value using first i items and capacity c
     A = [[0 for _ in range(capacity + 1)] for _ in range(n + 1)]
     
+    # subproblems, filled according to the book example code
     for i in range(1, n + 1):
-        size_i = sizes[i - 1]
-        value_i = values[i - 1]
+        # no need to fill with 0 sice already done when declaring
+
+        # size and value of item i
+        # to match the book exmaple create s_i and v_i (i - 1 since using 0 indexed lists instead of 1 like the book)
+        s_i = sizes[i - 1]
+        v_i = values[i - 1]
+        
+        # must test all capacity from 0 to capacity
         for c in range(capacity + 1):
-            if size_i > c:
+            # is it too large to fit?
+            if s_i > c:
                 A[i][c] = A[i - 1][c]
+            # if not is taking or leaving better?
             else:
                 skip = A[i - 1][c]
-                take = A[i - 1][c - size_i] + value_i
+                take = A[i - 1][c - s_i] + v_i
                 A[i][c] = max(skip, take)
-
+    # full dp table
     return A
 
 '''reconstruct knapsack contents pseudocode
@@ -82,18 +92,26 @@ return S
 '''
 def reconstruct(A, values, sizes,capacity):
     n = len(values)
-    # false arr S
+    # reconstructed list S init to False
+    # if S[i] = True we took it
     S = [False] * n
     c = capacity
-
+    
+    # count back from n through dp table to 1
     for i in range(n, 0, -1):
+        # to format like the book
         v_i = values[i - 1]
         s_i = sizes[i - 1]
         
+        # aboslute mess of an if statment 
+        # does the item fit? and is taking it as least as good (or better)?
         if s_i <= c and A[i - 1][c - s_i] + v_i >= A[i - 1][c]:
+            # set that we took it if true
             S[i - 1] = True
+            # update capacity
             c = c - s_i
 
+    # full reconstructed list
     return S
 
 def print_results(capacity, values, sizes, A, selections, print_array: bool = True):
